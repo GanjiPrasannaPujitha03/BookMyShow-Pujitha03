@@ -1,19 +1,25 @@
-# Stage 1: Build React app
+# Build stage
+
 FROM node:18 AS build
+
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
+COPY package*.json ./
+
+RUN npm install
+
 COPY . .
 
-# 👇 Important: fix for OpenSSL error in Node 18
-ENV NODE_OPTIONS=--openssl-legacy-provider
+RUN npm run build   # creates /app/build folder
 
-RUN npm run build
 
-# Stage 2: Serve with Nginx
+
+# Serve stage
+
 FROM nginx:alpine
+
 COPY --from=build /app/build /usr/share/nginx/html
 
-EXPOSE 3000
+EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
